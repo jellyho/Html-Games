@@ -1,0 +1,278 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Pong2P</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+<body>
+<h1 class="text-center">PONG 2P</h1>
+<div style="position:absolute; left:50%;margin-left:-600px;">
+<canvas id="canvas" height=800, width=1200></canvas>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+<script>
+var width=1200, height=800;
+var GAME = false;
+var GAMEOVER = false;
+var AREADY = false;
+var BREADY = false;
+var barw = 100;
+var Hw = 20;
+var barh = 20;
+var barv = 1;
+var ballw = 20;
+var bard = 50;
+var coll = barh;
+var BOOSTED = false;
+var BoostC = 2.7;
+
+var speed=10;
+var key = [];
+
+var APoints = 0;
+var BPoints=0;
+var Ay = height / 2 - barw /2;
+var By = height / 2 - barw/2;
+
+var Av = 0;
+var Bv = 0;
+var cx = 0.2;
+var cy = 0.4;
+
+var Px = width/2;
+var Py = height/2;
+
+var Pvx = 5 * dir() * 2;
+var Pvy = 6 * dir() * 0.8;
+
+var canvas = document.getElementById("canvas");
+canvas.style.border='1px solid black'
+var ctx = canvas.getContext("2d");
+
+function dir()
+{
+    a = Math.random(1);
+    if (a>= 0.5) 
+    {
+        return 0.5;
+    }
+    else 
+    {
+        return -0.5;
+    }
+}
+
+function reset()
+{
+    GAME = false;
+    AREADY = false;
+    BREADY = false;
+    Pvx = 5 * dir() * 2;
+    Pvy = 6 * dir() * 0.8;
+    Ay = height/2 - barw/2;
+    By = height/2 - barw/2;
+    Px = width/2;
+    Py = height/2;
+    Av = 0;
+    Bv = 0;
+}
+
+function ball()
+{
+    if(BOOSTED)
+    {
+        ctx.fillStyle="red";
+    }
+    else
+    {
+        ctx.fillStyle="white";
+    }
+    ctx.fillRect(Px - ballw/2, Py - ballw/2, ballw, ballw);
+
+    Px += Pvx;
+    Py += Pvy;
+
+    if(Pvx < 0 && Px < bard + ballw + ballw/2 && Px > bard + ballw + ballw/2 - coll && Ay < Py && Py < Ay + barw)
+    {
+        if(BOOSTED)
+        {
+            Pvx = Pvx / BoostC;
+            BOOSTED=false;
+        }
+        if(Ay + barw / 2 - Hw /2 < Py && Py < Ay +barw/2 + Hw/2)
+        {
+            BOOSTED = true;
+            Pvx = - BoostC * (Pvx);
+            Pvy += Av * cy;
+        }
+        else
+        {
+            Pvx = -1 * (Pvx);
+            Pvy += Av * cy;
+        }
+    }
+
+    if (Pvx > 0 && Px + ballw + ballw/2 + bard > width && Px + ballw + ballw/2 + bard < width + coll && By < Py && Py < By + barw)
+    {
+        if(BOOSTED)
+        {
+            Pvx = Pvx / BoostC;
+            BOOSTED = false;
+        }
+        if (By + barw/2 - Hw/2 < Py && Py < By + barw/2 + Hw/2)
+        {
+            BOOSTED = true;
+            Pvx = -BoostC * Pvx;
+            Pvy += Bv * cy;
+        }
+        else
+        {
+            Pvx = -1 * Pvx;
+            Pvy += Bv * cy;
+        }
+    }
+
+    if (Py < ballw/2)
+    {
+        Pvy = -Pvy;
+    }
+    if (Py + ballw/2 > height)
+    {
+        Pvy = -Pvy;
+    }
+
+    if(Px < 0)
+    {
+        BPoints +=1;
+        reset();
+    }
+
+    if(Px > width)
+    {
+        APoints +=1;
+        reset();
+    }
+}
+
+function points()
+{
+    ctx.fillStyle="white";
+    ctx.font="40px Arial";
+    ctx.fillText(APoints, width/4, 40);
+    ctx.fillText(BPoints, width * 3 / 4, 40);
+}
+
+function game()
+{
+    ctx.fillStyle="black";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle="white";
+    ctx.fillRect(bard, Ay, barh, barw);
+    ctx.fillRect(width-barh-bard, By, barh, barw);
+    ctx.fillStyle="red";
+    ctx.fillRect(bard, Ay + barw/2 - Hw/2, barh, Hw);
+    ctx.fillRect(width - barh - bard, By + barw/2 - Hw/2, barh, Hw);
+
+    if (GAME)
+    {
+        ball();
+        points();
+
+        if(key[83]&&!(Av < 0))
+        {
+            Av += barv;
+            if(Av > 10)
+                Av = 10;
+        }
+        else if (key[87]&&!(Av > 0))
+        {
+            Av += -barv;
+            if(Av < -10)
+                Av = -10;
+        }
+        else
+            Av = 0;
+
+        if(key[40]&&!(Bv < 0))
+        {
+            Bv += barv;
+            if(Bv > 10)
+                Bv = 10;
+        }
+        else if (key[38]&&!(Bv > 0))
+        {
+            Bv += -barv;
+            if(Bv < -10)
+                Bv = -10;
+        }
+        else
+            Bv = 0;
+
+        Ay += Av;
+        if(Ay < 0)
+            Ay = 0;
+        else if (Ay > height - barw)
+            Ay = height - barw;
+
+        By += Bv;
+        if(By < 0)
+            By = 0;
+        else if (By > height - barw)
+            By = height - barw
+
+        if (APoints > 9 || BPoints > 9)
+        {
+            if (APoints > BPoints)
+            {
+                alert("A SIDE WIN!");
+            }
+            else
+            {
+                alert("B SIDE WIN!");
+            }
+            APoints=0;
+            BPoints=0;
+            GAME=false;
+        }
+    }
+    else
+    {
+        BOOSTED=false;
+        points();
+        ctx.filStyle="white";
+        ctx.fillRect(Px-ballw/2, Py - ballw/2, ballw, ballw);
+        ctx.fillStyle = "white";
+        ctx.font="40px Arial";
+        if(key[65])
+            AREADY = true;
+        if(key[39])
+            BREADY = true;
+        if(AREADY&&BREADY)
+            GAME=true;
+        if(AREADY)
+        {
+            ctx.fillText("READY", width/6, 100);
+        }
+        if(BREADY)
+        {
+            ctx.fillText("READY", width * 4 / 6, 100);
+        }
+    }
+}
+var interval = setInterval(function()
+{
+game();
+}, speed);
+
+window.addEventListener("keydown", function(e)
+{
+    key[e.keyCode]=true;
+});
+window.addEventListener("keyup", function(e){
+    key[e.keyCode]=false;
+})
+</script>
+</body>
+</html>
