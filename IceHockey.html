@@ -1,0 +1,579 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title>Ice Hockey 2P</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+<body>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+<h3 style="text-align:center">Ice Hockey 2P</h3>
+<div class="container alert alert-success text-center">
+B: <kbd>W</kbd><kbd>S</kbd><kbd>A</kbd><kbd>D</kbd> 로 상하좌우, <kbd>Space</kbd>로 슛. A: <kbd>&uarr;</kbd><kbd>&darr;</kbd><kbd>&larr;</kbd><kbd>&rarr;</kbd> 로 상하좌우, <kbd>0</kbd>로 슛. 슛 버튼을 눌러 준비.
+</div>
+<div>
+</div>
+<div style="position:absolute; left:50%;margin-left:-650px;">
+<canvas id="canvas" height=700, width=1300></canvas>
+</div>
+<script>
+var width = 1300;
+var height = 700;
+var goalwidth = 100;
+var goalbarwidth = 10;
+var goaldepth = 50;
+var ascore = 0;
+var bscore = 0;
+var apre = false;
+var bpre = false;
+
+var key = [];
+var framerate = 60;
+
+class puck {
+    constructor() {
+        this.debug = false;
+        this.x = width/2;
+        this.y = height/2;
+        this.v = 0;
+        this.theta = 0;
+        this.vx = 0;
+        this.vy = 0;
+        this.drag = 0.1;
+        this.r = 10;
+        this.captured = false;
+        this.capturalbeV = 10;
+    }
+    reset()
+    {
+        this.x = width/2;
+        this.y = height/2;
+        this.v = 0;
+        this.theta = 0;
+        this.vx = 0;
+        this.vy = 0;
+    }
+    angle()
+    {
+        return (360-this.theta)%360;
+    }
+    setangle(a)
+    {
+        this.theta = (360 - a)% 360;
+    }
+    update()
+    {
+        if (!this.captured)
+        {
+            this.vx = this.v * Math.cos(Math.PI/180*this.angle());
+            this.vy = this.v * Math.sin(Math.PI/180*this.angle());
+            this.x += this.vx;
+            this.y += this.vy;
+
+            c1.captured = false;
+            c2.captrued = false;
+
+            if (this.v > 0)
+            {
+                this.v -= this.drag;
+            }
+            else
+            {
+                this.v = 0;
+            }
+
+            if (this.y > height - this.r)
+            {
+                if (this.angle() >= 0 && this.angle() < 180)
+                {
+                    this.setangle(360 - this.angle());
+                }
+            }
+            if (this.y < this.r)
+            {
+                if (this.angle() >=180 && this.angle() < 360)
+                {
+                    this.setangle(360 - this.angle());
+                }
+            }
+            if (this.x < goaldepth+this.r)
+            {
+                if((this.y>height/2-goalwidth/2)&&(height/2+goalwidth/2>this.y))
+                {
+                    console.log("goal!@!");
+                    bscore++;
+                    if (bscore > 4)
+                    {
+                        alert("B side wins!");
+                        reset();
+                        ascore = 0;
+                        bscore = 0;
+                    }
+                    reset();
+                }
+                if (this.angle()>=90&&this.angle()<270)
+                {
+                    this.setangle(180 - this.angle());
+                }
+            }
+            if (this.x>width-goaldepth-this.r)
+            {
+                if((this.y>height/2-goalwidth/2)&&(height/2+goalwidth/2>this.y))
+                {
+                    console.log("goal!@!");
+                    ascore++;
+                    if (ascore > 4)
+                    {
+                        alert("A side wins!");
+                        reset();
+                        ascore = 0;
+                        bscore = 0;
+                    }
+                    reset();
+                }
+                if((this.angle()>=0&&this.angle()<90)||(this.angle()>=270&&this.angle()<360))
+                {
+                    this.setangle(180 - this.angle());
+                }
+            }
+        }
+        else
+        {
+            this.v = 0;
+            this.x = this.captured.x + (this.captured.r+this.r) * Math.cos(this.captured.angle);
+            this.y = this.captured.y - (this.captured.r+this.r) * Math.sin(this.captured.angle);
+        }
+    }
+    draw()
+    {
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(this.x, height-this.y, this.r, 0, Math.PI * 2);
+        ctx.fill();
+        if (this.debug)
+        {
+            ctx.beginPath();
+            ctx.moveTo(this.x, height - this.y);
+            ctx.lineTo(this.x+100*Math.cos(Math.PI/180*this.angle()), height-(this.y+100*Math.sin(Math.PI/180*this.angle())));
+            ctx.stroke();
+        }
+    }
+}
+
+class char {
+    constructor()
+    {
+        this.r = 30;
+        this.vx = 0;
+        this.vy = 0;
+        this.drag = 0.1;
+        this.a = 0.3;
+        this.angle = 0;
+        this.x = width/3;
+        this.y = height/2;
+        this.color = "blue";
+        this.debug = true;
+        this.maxv = 20;
+        this.range = 15;
+        this.power = 0;
+        this.maxpower = 30;
+        this.powerv = 0.5;
+        this.pressed = false;
+        this.captured = false;
+        this.keys = [38, 40, 37, 39, 96];
+    }
+    reset()
+    {
+        this.x = width/3;
+        this.y = height/2;
+        this.vx = 0;
+        this.vy = 0;
+        this.angle = 0;
+    }
+    draw()
+    {
+        ctx.fillStyle = this.color;
+        ctx.beginPath();
+        ctx.arc(this.x, height - this.y, this.r, 0, Math.PI * 2);
+        ctx.fill();
+
+        if (this.power > 0)
+        {
+            ctx.fillStyle = this.color;
+            ctx.beginPath();
+            ctx.arc(this.x+this.r*Math.cos(this.angle), height - (this.y-this.r*Math.sin(this.angle)), this.power*2, this.angle - Math.PI/16, this.angle + Math.PI/16, false);
+            ctx.lineTo(this.x+this.r*Math.cos(this.angle), height - (this.y-this.r*Math.sin(this.angle)));
+            ctx.closePath();
+            ctx.fill();
+        }
+        ctx.fillStyle = "black";
+        ctx.beginPath();
+        ctx.arc(this.x, height - this.y, 25, this.angle - Math.PI/8, this.angle + Math.PI/8, false);
+        ctx.lineTo(this.x, height - this.y);
+        ctx.closePath();
+        ctx.fill();
+    }
+    update()
+    {
+        if(key[this.keys[2]]){this.vx-=this.a;}
+        if(key[this.keys[0]]){this.vy+=this.a;}
+        if(key[this.keys[3]]){this.vx+=this.a;}
+        if(key[this.keys[1]]){this.vy-=this.a;}
+        this.x += this.vx;
+        this.y += this.vy;
+
+        if(this.vx>0)
+        {
+            this.angle = Math.atan(-1*this.vy/this.vx);
+        }
+        else if(this.vx < 0)
+        {
+            this.angle = Math.atan(-1*this.vy/this.vx) + Math.PI;
+            if (!this.angle)
+                this.angle = 0;
+        }
+        else
+        {
+            if (this.vx == 0)
+            {
+                if(this.vy > 0)
+                {
+                    this.angle = Math.PI * 3 / 2;
+                }
+                else if (this.vy < 0)
+                {
+                    this.angle = Math.PI/2;
+                }
+            }
+        }
+
+        if (this.vx > this.maxv)
+        {
+            this.vx = this.maxv;
+        }
+        else if (this.vx > 0.2)
+        {
+            this.vx -= this.drag;
+        }
+        else if (this.vx < -this.maxv)
+        {
+            this.vx =  -this.maxv;
+        }
+        else if (this.vx < -0.2)
+        {
+            this.vx += this.drag;
+        }
+        else
+        {
+            this.vx = 0;
+        }
+
+        if (this.vy > this.maxv)
+        {
+            this.vy = this.maxv;
+        }
+        else if (this.vy > 0.2)
+        {
+            this.vy -= this.drag;
+        }
+        else if (this.vy < -this.maxv)
+        {
+            this.vy = -this.maxv;
+        }
+        else if (this.vy < -0.2)
+        {
+            this.vy += this.drag;
+        }
+        else
+        {
+            this.vy = 0;
+        }
+
+        if (this.y - this.r < 0)
+        {
+            if (this.vy < 0)
+                this.vy *= -0.5;
+        }
+        if(this.y + this.r > height)
+        {
+            if(this.vy > 0)
+                this.vy *= -0.5;
+        }
+        if(this.x-this.r < goaldepth)
+        {
+            if(this.vx < 0)
+                this.vx *= -0.5;
+        }
+        if(this.x+this.r > width-goaldepth)
+        {
+            if(this.vx > 0)
+                this.vx *= -0.5;
+        }
+
+
+        if (this.captured!=false)
+        {
+            if (key[this.keys[4]])
+            {
+                if (!this.pressed)
+                {
+                    this.pressed = true;
+                }
+                this.a = 0.3;
+                this.maxv = 15;
+                if (this.power < this.maxpower)
+                {
+                    this.power += this.powerv;
+                }
+            }
+            else if (!key[this.keys[4]])
+            {
+                if (this.pressed)
+                {
+                    p.v = this.power;
+                    p.setangle(this.angle/Math.PI*180*-1);
+                    this.captrued = false;
+                    p.captured = false;
+                }
+                this.a = 0.3;
+                this.maxv = 20;
+                this.pressed = false;
+                this.power = 0;
+            }
+        }
+        else
+        {
+            this.power = 0;
+            this.pressed = false;
+        }
+    }
+}
+
+function reset()
+{
+    c1.reset();
+    c2.reset();
+    p.reset();
+    c1.x = width/3*2;
+    bpre = false;
+    apre = false;
+    drawmap(false);
+    c1.draw();
+    c2.draw();
+}
+
+function drawmap(score=true)
+{
+    ctx.fillStyle = "white";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle = "black";
+    ctx.fillRect(goaldepth, 0, width-goaldepth*2, height);
+    ctx.fillStyle = "white";
+    ctx.fillRect(goaldepth+3, 3, width-goalwidth-6, height - 6);
+    ctx.fillRect(goaldepth, height/2-goalwidth/2, width, goalwidth);
+    ctx.fillStyle = "red";
+    ctx.beginPath();
+    ctx.arc(width/2, height/2, 78, 0, Math.PI*2);
+    ctx.fill();
+    ctx.fillStyle = "white";
+    ctx.beginPath();
+    ctx.arc(width/2, height/2, 75, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle ="red";
+    ctx.fillRect(width/2-1.5, 3, 3, height-6);
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, height/2-goalwidth/2-goalbarwidth, goaldepth, goalbarwidth);
+    ctx.fillRect(0, height/2+goalwidth/2, goaldepth, goalbarwidth);
+    ctx.fillRect(width-goaldepth, height/2-goalwidth/2-goalbarwidth, goaldepth, goalbarwidth);
+    ctx.fillRect(width-goaldepth, height/2+goalwidth/2, goaldepth, goalbarwidth);
+    if (score)
+    {
+        ctx.fillStyle = "black";
+        ctx.font = "40px Arial";
+        ctx.fillText(ascore, width/4, 40);
+        ctx.fillText(bscore, width * 3 / 4, 40);
+    }
+}
+
+var interval = setInterval(function()
+{
+    game();
+}, 1000/framerate);
+
+var canvas = document.getElementById("canvas");
+canvas.style.border = "1px, solid black";
+var ctx = canvas.getContext("2d");
+
+var p = new puck();
+var c1 = new char();
+var c2 = new char();
+
+c1.x = width/3*2;
+c2.color="red";
+c2.x = width/3;
+c2.keys=[87, 83, 65, 68, 32];
+
+reset();
+
+function game()
+{
+    if(apre&&bpre)
+    {
+        drawmap(true);
+        c2.update();
+        c2.draw();
+        c1.update();
+        c1.draw();
+        p.update();
+        p.draw();
+        calCollision();
+    }
+    else
+    {
+        if (apre)
+        {
+            ctx.fillStyle = "black";
+            ctx.font = "40px Arial";
+            ctx.fillText("A Ready", width*3/4, 40);
+        }
+        if (bpre)
+        {
+            ctx.fillStyle = "black";
+            ctx.font = "40px Arial";
+            ctx.fillText("B Ready", width/4, 40);
+        }
+        if(key[c1.keys[4]])
+        {
+            apre = true;
+        }
+        if(key[c2.keys[4]])
+        {
+            bpre = true;
+        }
+    }
+}
+
+function calCollision()
+{
+    var c = 1;
+    function d(a, b)
+    {
+        return Math.sqrt((a.x-b.x)*(a.x-b.x)+(a.y-b.y)*(a.y-b.y));
+    }
+
+    function cold(a, b)
+    {
+        return a.r+b.r;
+    }
+
+    if(d(p, c1)<=cold(p, c1))
+    {
+        var dv = Math.abs(Math.sqrt((p.v*Math.cos(p.angle())-c1.vx)*(p.v*Math.cos(p.angle())-c1.vx)+(p.v*Math.sin(p.angle())-c1.vy)*(p.v*Math.sin(p.angle())-c1.vy)));
+
+        if (dv > this.capturalbeV)
+        {
+            var ratio = (cold(p, c1) - d(p, c1)) / d(p, c1);
+            var dx = (p.x - c1.x) * ratio;
+            var dy = (p.y - c1.y) * ratio;
+
+            c1.x -= dx;
+            c1.y -= dy;
+
+            var pvx = (p.r*p.r*p.vx+2*c1.r*c1.r*cl.vx-c1.r*c1.r*p.vx) / (p.r*p.r+c1.r*c1.r);
+            var pvy = (p.r*p.r*p.vy+2*c1.r*c1.r*c1.vy-c1.r*c1.r*p.vy) / (p.r*p.r+c1.r*c1.r);
+
+            if (pvx > 0)
+            {
+                p.setangle(Math.atan(pvy/pvx) / Math.PI*180);
+            }
+            else
+            {
+                p.setangle(Math.atan(pvy/pvx) / Math.PI*180 + 180);
+            }
+            p.v = Math.sqrt(pvx*pvx+pvy*pvy)*c;
+            c1.vx = (c1.r*c1.r*c1.vx+2*p.r*p.r*p.vx-p.r*p.r*c1.vx) / (p.r*p.r+c1.r*c1.r);
+            c1.vy = (c1.r*c1.r*c1.vy+2*p.r*p.r*p.vy-p.r*p.r*c1.vy) / (p.r*p.r+c1.r*c1.r);
+        }
+        else
+        {
+            if(!p.captured)
+            {
+                p.captured = c1;
+                c1.captured = true;
+            }
+        }
+    }
+
+    if(d(p, c2)<=cold(p, c2))
+    {
+        var dv = Math.abs(Math.sqrt((p.v*Math.cos(p.angle())-c2.vx)*(p.v*Math.cos(p.angle())-c2.vx)+(p.v*Math.sin(p.angle())-c2.vy)*(p.v*Math.sin(p.angle())-c2.vy)));
+
+        if (dv > this.capturalbeV)
+        {
+            var ratio = (cold(p, c2) - d(p, c2)) / d(p, c2);
+            var dx = (p.x - c2.x) * ratio;
+            var dy = (p.y - c2.y) * ratio;
+
+            c2.x -= dx;
+            c2.y -= dy;
+
+            var pvx = (p.r*p.r*p.vx+2*c2.r*c2.r*c2.vx-c2.r*c2.r*p.vx) / (p.r*p.r+c2.r*c2.r);
+            var pvy = (p.r*p.r*p.vy+2*c2.r*c2.r*c2.vy-c2.r*c2.r*p.vy) / (p.r*p.r+c2.r*c2.r);
+
+            if (pvx > 0)
+            {
+                p.setangle(Math.atan(pvy/pvx) / Math.PI*180);
+            }
+            else
+            {
+                p.setangle(Math.atan(pvy/pvx) / Math.PI*180 + 180);
+            }
+            p.v = Math.sqrt(pvx*pvx+pvy*pvy)*c;
+            c2.vx = (c2.r*c2.r*c2.vx+2*p.r*p.r*p.vx-p.r*p.r*c2.vx) / (p.r*p.r+c2.r*c2.r);
+            c2.vy = (c2.r*c2.r*c2.vy+2*p.r*p.r*p.vy-p.r*p.r*c2.vy) / (p.r*p.r+c2.r*c2.r);
+        }
+        else
+        {
+            if(!p.captured)
+            {
+                p.captured = c2;
+                c2.captured = true;
+            }
+        }
+    }
+
+    if(d(c1, c2)<=cold(c1, c2))
+    {
+        var ratio = (cold(c1, c2) - d(c1, c2)) / d(c1, c2);
+        var dx = (c1.x - c2.x) * ratio;
+        var dy = (c1.y - c2.y) * ratio;
+
+        c2.x -= dx;
+        c2.y -= dy;
+
+        c1.x += dx;
+        c1.y += dy;
+
+        var c2vx = (2*c1.r*c1.r*c1.vx) / (c1.r*c1.r + c2.r*c2.r);
+        var c2vy = (2*c1.r*c1.r*c1.vy) / (c1.r*c1.r + c2.r*c2.r);
+        var c1vx = (2*c2.r*c2.r*c2.vx) / (c1.r*c1.r + c2.r*c2.r);
+        var c1vy = (2*c2.r*c2.r*c2.vy) / (c1.r*c1.r + c2.r*c2.r);
+
+        c1.vx = c1vx;
+        c1.vy = c1vy;
+        c2.vx = c2vx;
+        c2.vy = c2vy;
+
+        p.captured = false;
+    }
+}
+window.addEventListener("keydown", function(e){
+    key[e.keyCode]=true;
+});
+window.addEventListener("keyup", function(e){
+    key[e.keyCode]=false;
+})
+</script>
+</body>
+</html>
