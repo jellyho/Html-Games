@@ -1,6 +1,6 @@
 # Html-Games
 
-Html games made during military service
+Games that I made when I was bored haha
 
 ---
 ## 1. Flappy Bird
