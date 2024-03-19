@@ -32,4 +32,12 @@ Games that I made when I was bored haha
 
 ### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html)
 
-### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html](https://github.com/jellyho/Html-Games/blob/master/archer.html)https://github.com/jellyho/Html-Games/blob/master/archer.html)
+### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html)
+
+---
+## 5. Wordle
+![](img/wordle.png)
+
+### [Play](https://jellyho.com/media/single_pages/images/2024/03/19/wordle.html) 
+
+### [Code](https://github.com/jellyho/Html-Games/blob/master/wordle.html)
