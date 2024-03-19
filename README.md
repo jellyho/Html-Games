@@ -30,6 +30,6 @@ Games that I made when I was bored haha
 ## 4. Ice Hockey 2P
 ![](img/archer.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html)
+### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html](https://jellyho.com/media/single_pages/images/2024/03/19/archer.html)
 
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html](https://github.com/jellyho/Html-Games/blob/master/archer.html)https://github.com/jellyho/Html-Games/blob/master/archer.html)
