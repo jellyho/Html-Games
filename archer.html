@@ -1,0 +1,501 @@
+<html>
+<head>
+    <title>Archor</title>
+</head>
+<body>
+<script>
+var width = window.innerWidth * 0.9;
+var height = window.innerHeight * 0.9;
+var key = [];
+var framerate = 100;
+var BASELINE = 100;
+var ZIGGER = 40;
+var SCREENX = 6050;
+var canvas=document.createElement("canvas");
+canvas.width=width;
+canvas.height=height;
+canvas.style.border="lpx solid black";
+var ctx=canvas.getContext("2d");
+document.body.appendChild(canvas) ;
+var interval = setInterval(function ()
+{
+    game ();
+},1000/framerate) ;
+var map_array = new Array();
+for (var i=0;i<1000;i++)
+{
+    map_array.push(BASELINE+Math.random(1)*ZIGGER);
+}
+function drawMap ()
+{
+    ctx.fillStyle="skyblue";
+    ctx.fillRect(0, 0, width, height);
+    ctx.fillStyle ="black";
+    ctx.font="40px Arial";
+    ctx.fillText(COUNT, width / 2, 40);
+    ctx.fillStyle="green";
+    var index = (SCREENX - SCREENX % 200) / 200;
+    ctx.strokeStyle="black";
+    ctx.beginPath();
+    ctx.lineWidth=3;
+    ctx.moveTo(200*(index-5)-SCREENX+width/2, height - map_array[index-5]);
+    for (var i=index-4;i<index+10;i++)
+    {
+        ctx.lineTo(200*i-SCREENX+width/2, height - map_array[i]);
+    }
+    ctx.lineTo(width, height);
+    ctx.lineTo(0, height);
+    ctx.closePath();
+    ctx.stroke();
+    ctx.fill();
+}
+class Archor
+{
+    constructor(dirRight=true)
+    {
+        this.x = 5800;
+        this.dirRight = dirRight;
+        this.h = 140;
+        this.headr = 20;
+        this.bodyl = 70;
+        this.footi= 30;
+        this.BowR = 50;
+        this.BowAngle = Math.PI/5;
+        this.Center = 90;
+        this.angle = 0;
+        this.LongHandAnker = 22;
+        this.ShortHandAngle = Math.PI/9;
+        this.Shoulder = 5;
+        this.Pull = 0;
+        this.loading = false;
+        this.keys = [37, 39]
+        this.speed = 2;
+        this.health = 100;
+        this.prevshot = [0, 0, 0, 0];
+    }
+    draw ()
+    {
+        ctx.beginPath();
+        ctx.lineWidth= 5;
+
+        ctx.arc(this. x-SCREENX+width/2, height - (BASELINE+this.h), this.headr,0, Math.PI*2);
+        ctx.moveTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr));
+        ctx.lineTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr-this.bodyl));
+        ctx.lineTo(this.x-SCREENX+width/2-this.footi, height - BASELINE);
+        ctx.moveTo(this.x-SCREENX+width/2, height -(BASELINE+this.h-this.headr-this.bodyl));
+        ctx.lineTo(this.x-SCREENX+width/2+this.footi, height - BASELINE);
+        ctx.closePath();
+        ctx.stroke();
+
+        ctx.beginPath();
+        ctx.lineWidth=2;
+        ctx.strokeStyle="black";
+
+        ctx.moveTo(this.x-SCREENX+width/2+this.BowR*Math.cos(this.angle+this.BowAngle), height-(BASELINE+this.Center+this.BowR*Math.sin(this.angle+this.BowAngle)));
+        ctx.lineTo(this.x-SCREENX+width/2+(this.BowR*Math.cos(this.BowAngle)-this.Pull)*Math.cos(this.angle), height-(BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle)-this. Pull)*Math.sin(this.angle)));
+        ctx.lineTo(this.x-SCREENX+width/2+this.BowR*Math.cos(this.angle-this.BowAngle), height-(BASELINE+this.Center+this.BowR*Math.sin(this.angle-this.BowAngle)));
+        ctx.lineTo(this.x-SCREENX+width/2+(this.BowR*Math.cos(this.BowAngle) -this.Pull)*Math.cos(this.angle), height - (BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle) -this.Pull)*Math.sin(this.angle)));
+        ctx.closePath();
+        ctx.stroke();
+        ctx.lineWidth=1;
+        
+        ctx.beginPath();
+        ctx.lineWidth=5;
+        if (this.dirRight)
+        {
+            ctx.moveTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr - this.Shoulder));
+            ctx.lineTo(this.x-SCREENX+width/2 - this.LongHandAnker, height - (BASELINE+this.h-this.headr - this.Shoulder - this.LongHandAnker));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.moveTo(this.x-SCREENX+width/2 - this.LongHandAnker, height - (BASELINE+this.h-this.headr - this.Shoulder - this.LongHandAnker));
+            ctx.lineTo (this.x-SCREENX+width/2 + (this.BowR*Math.cos(this.BowAngle) - this.Pull)*Math.cos(this.angle), height - (BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle) - this.Pull)*Math.sin(this.angle)));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle = "black";
+            ctx.lineWidth=1;
+        }
+        else
+        {
+            ctx.moveTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr - this.Shoulder));
+            ctx.lineTo(this.x-SCREENX+width/2 + this.LongHandAnker, height - (BASELINE+this.h-this.headr - this.Shoulder - this.LongHandAnker));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.moveTo(this.x-SCREENX+width/2 + this.LongHandAnker, height - (BASELINE+this.h-this.headr - this.Shoulder - this.LongHandAnker));
+            ctx.lineTo(this.x-SCREENX+width/2+(this.BowR*Math.cos (this. BowAngle) - this.Pull)*Math.cos(this.angle), height - (BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle) - this.Pull) *Math.sin(this.angle)));
+            ctx.closePath ();
+            ctx.stroke();
+            ctx.strokeStyle="black";
+            ctx.lineWidth=1 ;
+        }
+
+        if (this.dirRight)
+        {
+            ctx.beginPath();
+            ctx.lineWidth=5;
+            ctx.moveTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr - this.Shoulder));
+            ctx.lineTo(this.x-SCREENX+width/2 + this.BowR*Math.cos(this.angle-this.ShortHandAngle), height - (BASELINE+this.Center+this.BowR*Math.sin(this.angle-this.ShortHandAngle)));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle="black";
+            ctx.lineWidth=1;
+        }
+        else
+        {
+            ctx.beginPath();
+            ctx.lineWidth=5;
+            ctx.moveTo(this.x-SCREENX+width/2, height - (BASELINE+this.h-this.headr - this.Shoulder));
+            ctx.lineTo(this.x-SCREENX+width/2 + this.BowR*Math.cos(this.angle+this.ShortHandAngle), height - (BASELINE+this.Center+this.BowR*Math.sin(this.angle+this.ShortHandAngle)));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle="black";
+            ctx.lineWidth=1;
+        }
+
+        ctx.beginPath();
+        ctx.lineWidth=3;
+        ctx.strokeStyle="brown";
+
+        // ctx.arc(this.x-SCREENX+width/2, height - (BASELINE + this.Center), this.BowR -(this.angle-this.BowAngle), -(this.angle+this.BowAngle), true);
+        ctx.arc(this.x-SCREENX+width/2, height - (BASELINE + this.Center), this.BowR,-(this.angle+this.BowAngle), -(this.angle-this.BowAngle));
+        // ctx.closePath();
+        ctx.stroke();
+        ctx.strokeStyle="black";
+        ctx.lineWidth=1;
+
+        if(this.loading)
+        {
+            ctx.beginPath();
+            ctx.lineWidth=1;
+            ctx.moveTo(this.x-SCREENX+width/2+(this.BowR*Math.cos(this.BowAngle) - this.Pull)*Math.cos(this.angle), height - (BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle) - this.Pull) *Math.sin(this.angle)));
+            ctx.lineTo(this.x-SCREENX+width/2+(this.BowR*Math.cos(this.BowAngle) - this.Pull+60)*Math.cos(this.angle), height - (BASELINE+this.Center+(this.BowR*Math.cos(this. BowAngle) -this.Pull+60)*Math.sin(this.angle)));
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle="black";
+            ctx.lineWidth=1;
+        }
+
+        ctx.beginPath();
+        ctx.lineWidth=2;
+        ctx.strokeStyle="red";
+        ctx.moveTo(this.x-this.footi-SCREENX+width/2, height - (BASELINE+this.h+60));
+        ctx.lineTo(this.x+this.footi-SCREENX+width/2, height - (BASELINE+this.h+60));
+        ctx.lineTo(this.x+this.footi-SCREENX+width/2, height - (BASELINE+this.h+45));
+        ctx.lineTo(this.x-this.footi-SCREENX+width/2, height - (BASELINE+this.h+45));
+        ctx.closePath();
+        ctx.stroke() ;
+        ctx.strokeStyle="black";
+        ctx.lineWidth=1;
+        ctx.fillStyle="red";
+        ctx.fillRect(this.x-this.footi-SCREENX+width/2, height - (BASELINE+this.h+60), 2*this.footi*this.health/100, 15);
+        ctx.fillStyle="black";
+        if(this.dirRight&&TURN || !this.dirRight&&!TURN)
+        {
+            ctx.strokeStyle="rgba(255, 0, 0, 0.5)";
+            ctx.lineWidth=2;
+            ctx.moveTo(this.prevshot[0], this.prevshot[1]);
+            ctx.lineTo(this.prevshot[2], this.prevshot[3]);
+            ctx.closePath();
+            ctx.stroke();
+            ctx.strokeStyle="black";
+            ctx.lineWidth=1;
+        }
+    }
+    shot (px, py)
+    {
+        return Shoot(this.x+(this.BowR*Math.cos(this.BowAngle) - this.Pull+30)*Math.cos(this.angle), (BASELINE+this.Center+(this.BowR*Math.cos(this.BowAngle) - this.Pull + 30) * Math.sin(this.angle)), px, py);
+    }
+
+    update ()
+    {
+        if(key[this.keys[0]])
+        {
+            this.x -= this.speed;
+        }
+        if(key[this.keys[1]])
+        {
+            this.x += this.speed;
+        }
+    }
+
+    cal_col(arrow)
+    {
+        if(this.x-this.footi < arrow.x && this.x+this.footi > arrow. x)
+        {
+            if(this.h+this.headr+BASELINE > arrow.y && arrow.y > BASELINE)
+            {
+                arrow.fixed = true;
+                arrow.shoted = this;
+                arrow.dx = arrow.x-this.x;
+                if(arrow.y < BASELINE + this.h + this.headr && arrow.y > BASELINE + this.h - this.headr)
+                {
+                    this.health -= 70;
+                }
+                else
+                {
+                    this.health -= 30;
+                }
+            }
+        }
+    }
+}
+
+class Arrow
+{
+    constructor(x, y, px, py)
+    {
+        this.x = x;
+        this.y = y;
+        this.vx = px;
+        this.vy = py;
+        this.dx = 0;
+        this.angle = this.cal_angle();
+        this.fixed = false;
+        this.gravity = 0.15;
+        this.length = 30;
+        this.shoted = false;
+    }
+    cal_angle()
+    {
+        if (this.vy >= 0)
+        {
+            return Math.atan(this.vy/this.vx);
+        }
+        else
+        { 
+            return Math.atan(this.vy/this.vx) + Math.PI;
+        }
+    }
+
+    update()
+    {
+        if(!this.fixed)
+        {
+            this.x += this.vx;
+            this.y += this.vy;
+            this.angle =  this.cal_angle();
+            this.vy -= this.gravity;
+        }
+        else if(this.shoted)
+        {
+            this.x = this.shoted.x+this.dx;
+        }
+        if(this.y < BASELINE+ZIGGER/2)
+        {
+            this.fixed = true;
+        }
+    }
+    draw()
+    {
+        ctx.strokeStyle = "black";
+        ctx.beginPath();
+        ctx.moveTo(this.x-this.length*Math.cos(this.angle) -SCREENX+width/2, height - (this.y-this.length*Math.sin(this.angle)));
+        ctx.lineTo(this.x+this.length*Math.cos(this.angle) -SCREENX+width/2, height - (this.y+this.length*Math.sin(this.angle)));
+        ctx.closePath();
+        ctx.stroke();
+    }
+}
+
+var p1 = new Archor(true) ;
+var p2 = new Archor(false) ;
+var Arrows = new Array();
+var Charging = false;
+var ShootPower = 0.2;
+var MaxPower = 800;
+var pointermove = [0, 0, 0, 0, 0];
+var Anchor = false;
+
+function Shoot (x, y, px, py)
+{
+    var arrow = new Arrow(x, y, px*ShootPower, py*ShootPower) ;
+    Arrows.push(arrow);
+    return arrow;
+}
+function resetGame ()
+{
+    p1.x = 93000 + Math.random(1)*4000;
+    p2.x = 107000 - Math.random(1)*4000;
+    p2.angle = Math.PI;
+}
+
+var TURN = true;
+var COUNT = 10;
+var FLYING = false;
+var WAITING = false;
+var FLYINGTARGET = false;
+var TimerInterval = false;
+
+resetGame();
+
+function Timer ()
+{
+    COUNT -= 1;
+}
+
+function game ()
+{
+    if (!TimerInterval)
+    {
+        TimerInterval = setInterval(function()
+        {
+            Timer();
+        }, 1000);
+    }
+    if(FLYING)
+    {
+        COUNT = 10;
+        SCREENX = FLYINGTARGET.x;
+        if(TURN)
+        {
+            p2.cal_col(FLYINGTARGET);
+        }
+        else
+        {
+            p1.cal_col(FLYINGTARGET);
+        }
+
+        if(FLYINGTARGET.fixed)
+        {
+            FLYING = false;
+            WAITING = true;
+            COUNT = 1;
+        } 
+    }
+    else if(WAITING)
+    {
+        if(COUNT<0)
+        {
+            COUNT = 10;
+            TURN = !TURN;
+            WAITING = false;
+        }
+    }
+    else if(TURN)
+    {
+        p1.update();
+        SCREENX = p1.x+300;
+        if (COUNT<0)
+        {
+            COUNT = 10;
+            TURN = false;
+            Charging = false;
+        }
+    }
+    else
+    {
+        p2.update();
+        SCREENX = p2.x-300;
+        if (COUNT<0)
+        {
+            COUNT = 10;
+            TURN = true;
+            Charging = false;
+        }
+    }
+    drawMap();
+    p1.draw();
+    p2.draw();
+
+    for(var i=0;i<Arrows.length;i++)
+    {
+        Arrows[i].update();
+        Arrows[i].draw();
+    }
+    
+    if (Charging)
+    {
+        ctx.strokeStyle="red";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        ctx.moveTo(pointermove[0], pointermove[1]);
+        ctx.lineTo(pointermove[2], pointermove[3]);
+        ctx.closePath();
+        ctx.stroke();
+        ctx.strokeStyle= "biack";
+    }
+    if (p1.health <= 0 || p2.health <=0)
+    {
+        ctx.fillText("GAMEOVER", width/2, height/2);
+        clearInterval(interval);
+    }
+}
+
+canvas.addEventListener("mousedown", function(e) {
+    if(!Charging && !FLYING && !WAITING)
+    {
+        pointermove[0] = e.clientX;
+        pointermove[1] = e.clientY;
+        pointermove[2] = e.clientX;
+        pointermove[3] = e.clientY;
+        Charging = true;
+        if (TURN)
+            p1.loading = true;
+        else
+            p2.loading = true;
+    }
+});
+
+canvas.addEventListener ("mousemove", function (e) {
+    if(Charging)
+    {
+        pointermove[2] = e.clientX;
+        pointermove[3] = e.clientY;
+        var dx = pointermove[0]-pointermove[2];
+        var dy = pointermove[3]-pointermove[1];
+        var Angle = 0;
+        if (dx >= 0)
+        {
+            Angle = Math.atan(dy/dx);
+        }
+        else
+        {
+            Angle = Math.atan(dy/dx) + Math.PI;
+        }
+        if (TURN)
+        {
+            p1.angle = Angle;
+            p1.Pull = Math.sqrt(dx**2+dy**2)/25;
+        }
+        else
+        {
+            p2.angle = Angle;
+            p2.Pull = Math.sqrt(dx**2+dy**2)/25;
+        }
+    }
+});
+
+window.addEventListener("mouseup", function (e) {
+    if (Charging)
+    {
+        Charging = false;
+        FLYING = true;
+        if (TURN)
+        {
+            var arr = p1.shot(ShootPower*(pointermove[0] - pointermove[2]), ShootPower*(pointermove[3] - pointermove[1]));
+            FLYINGTARGET = arr;
+            p1.angle = 0;
+            p1.Pull = 0;
+            p1.loading = false;
+            p1.prevshot = [pointermove[0], pointermove[1], pointermove[2], pointermove[3]];
+        }
+        else
+        {
+            var arr = p2.shot(ShootPower*(pointermove[0] - pointermove[2]), ShootPower* (pointermove[3] - pointermove[1]));
+            FLYINGTARGET = arr;
+            p2.angle = Math.PI;
+            p2.Pull = 0;
+            p2.loading = false;
+            p2.prevshot = [pointermove[0], pointermove[1], pointermove[2], pointermove[3]];
+        }
+    }
+});
+
+window.addEventListener("keydown", function (e) {
+key[e.keyCode]=true;
+});
+
+window.addEventListener("keyup" , function (e) {
+key[e.keyCode]=false;
+});
+</script>
+</body>
+</html>
