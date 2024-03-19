@@ -27,7 +27,7 @@ Games that I made when I was bored haha
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html)
 
 ---
-## 4. Ice Hockey 2P
+## 4. Archer 2P
 ![](img/archer.png)
 
 ### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html)
