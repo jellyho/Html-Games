@@ -4,7 +4,7 @@ Games that I made when I was bored haha
 
 ---
 ## 1. Flappy Bird
-![](img/flppy.png)
+<img src="img/flppy.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/Flappy_Bird.html)
 
@@ -12,7 +12,7 @@ Games that I made when I was bored haha
 
 ---
 ## 2. PONG 2P
-![](img/pong.png)
+<img src="img/pong.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/Pong2P.html)
 
@@ -20,7 +20,7 @@ Games that I made when I was bored haha
 
 ---
 ## 3. Ice Hockey 2P
-![](img/hockey.png)
+<img src="img/hockey.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/IceHockey.html)
 
@@ -28,7 +28,7 @@ Games that I made when I was bored haha
 
 ---
 ## 4. Archer 2P
-![](img/archer.png)
+<img src="img/archer.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/archer.html)
 
@@ -36,7 +36,7 @@ Games that I made when I was bored haha
 
 ---
 ## 5. Wordle
-![](img/wordle.png)
+<img src="img/worlde.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/wordle.html) 
 
