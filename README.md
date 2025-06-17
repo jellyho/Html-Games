@@ -36,7 +36,7 @@ Games that I made when I was bored haha
 
 ---
 ## 5. Wordle
-<img src="img/worlde.png" width="200">
+<img src="img/wordle.png" width="200">
 
 ### [Play](https://jellyho.github.io/Html-Games/wordle.html) 
 
