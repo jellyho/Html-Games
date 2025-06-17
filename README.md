@@ -6,7 +6,7 @@ Games that I made when I was bored haha
 ## 1. Flappy Bird
 ![](img/flppy.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2022/11/04/Flappy_Bird.html)
+### [Play](https://jellyho.github.io/Html-Games/Flappy_Bird.html)
 
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/Flappy%20Bird.html)
 
@@ -14,7 +14,7 @@ Games that I made when I was bored haha
 ## 2. PONG 2P
 ![](img/pong.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2022/11/03/Pong2P.html)
+### [Play](https://jellyho.github.io/Html-Games/Pong2P.html)
 
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/Pong2P.html)
 
@@ -22,7 +22,7 @@ Games that I made when I was bored haha
 ## 3. Ice Hockey 2P
 ![](img/hockey.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html)
+### [Play](https://jellyho.github.io/Html-Games/IceHockey.html)
 
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html)
 
@@ -30,14 +30,14 @@ Games that I made when I was bored haha
 ## 4. Archer 2P
 ![](img/archer.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2022/12/01/IceHockey.html)
+### [Play](https://jellyho.github.io/Html-Games/archer.html)
 
-### [Code](https://github.com/jellyho/Html-Games/blob/master/IceHockey.html)
+### [Code](https://github.com/jellyho/Html-Games/blob/master/archer.html)
 
 ---
 ## 5. Wordle
 ![](img/wordle.png)
 
-### [Play](https://jellyho.com/media/single_pages/images/2024/03/19/wordle.html) 
+### [Play](https://jellyho.github.io/Html-Games/wordle.html) 
 
 ### [Code](https://github.com/jellyho/Html-Games/blob/master/wordle.html)
