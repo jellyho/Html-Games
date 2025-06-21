@@ -18,8 +18,6 @@ Games that I made when I was bored haha
       <a href="https://jellyho.github.io/Html-Games/Pong2P.html">Play</a> | 
       <a href="https://github.com/jellyho/Html-Games/blob/master/Pong2P.html">Code</a>
     </td>
-  </tr>
-  <tr>
     <td align="center">
       <strong>3. Ice Hockey 2P</strong><br>
       <img src="img/hockey.png" width="200"><br>
@@ -32,9 +30,7 @@ Games that I made when I was bored haha
       <a href="https://jellyho.github.io/Html-Games/archer.html">Play</a> | 
       <a href="https://github.com/jellyho/Html-Games/blob/master/archer.html">Code</a>
     </td>
-  </tr>
-  <tr>
-    <td align="center" colspan="2">
+    <td align="center">
       <strong>5. Wordle</strong><br>
       <img src="img/wordle.png" width="200"><br>
       <a href="https://jellyho.github.io/Html-Games/wordle.html">Play</a> | 
