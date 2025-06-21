@@ -10,7 +10,7 @@ Games that I made when I was bored haha
       <strong>1. Flappy Bird</strong><br>
       <img src="img/flppy.png" width="200"><br>
       <a href="https://jellyho.github.io/Html-Games/Flappy_Bird.html">Play</a> | 
-      <a href="https://github.com/jellyho/Html-Games/blob/master/Flappy%20Bird.html">Code</a>
+      <a href="https://github.com/jellyho/Html-Games/blob/master/Flappy_Bird.html">Code</a>
     </td>
     <td align="center">
       <strong>2. PONG 2P</strong><br>
