@@ -582,7 +582,7 @@ class BG {
         for (var i = 0; i < this.layer; i++)
         {
             var h = height * (1 - i * del) * power;
-            ctx.fillStyle = this.getColor(i);
+            ctx.fillStyle = this.getColor(this.layer - i);
             ctx.fillRect(0, height - h, width, h);
         }
     }
