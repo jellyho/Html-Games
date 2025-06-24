@@ -36,5 +36,11 @@ Games that I made when I was bored haha
       <a href="https://jellyho.github.io/Html-Games/wordle.html">Play</a> | 
       <a href="https://github.com/jellyho/Html-Games/blob/master/wordle.html">Code</a>
     </td>
+    <td align="center">
+      <strong>6. JJamp King</strong><br>
+      <img src="img/char.png" width="200"><br>
+      <a href="https://jellyho.github.io/Html-Games/jjamp_king.html">Play</a> | 
+      <a href="https://github.com/jellyho/Html-Games/blob/master/jjamp_king.html">Code</a>
+    </td>
   </tr>
 </table>

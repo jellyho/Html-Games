@@ -1,0 +1,889 @@
+<html>
+<head>
+<title>JJamp King</title>
+</head>
+<body>
+    <canvas id="gameCanvas" width="1000" height="700" style="border:1px solid rgb(255, 255, 255); display: block; margin: 0 auto;"></canvas>
+</body>
+<script type="text/javascript">
+//Constants
+var key = [];
+var width = 1000, height = 700;
+var FrameRate = 100;
+var online = true;
+var canvas = document.getElementById("gameCanvas");
+var name = "JJamp King";
+canvas.width=width;
+canvas.height=height;
+// canvas.style.border='1px solid black';
+// canvas.style="position: absolute: left: calc(100vw * 0.22): top: calc(100vh * 0.16):";
+var ctx=canvas.getContext("2d");
+ctx.imageSmoothingEnabled = false;
+// document.body.appendChild(canvas);
+
+class Timer {
+    constructor(){
+        this.time = 0;
+    }
+    plus(){
+        this.time++;
+    }
+    str(){
+        var timer = new Timer()
+        return ""+(this.time-this.time%60)/60+"min "+this.time%60+"sec";
+    }
+}
+
+var timer = new Timer();
+var clock = setInterval(function(){ timer.plus(); }, 1000);
+
+var char1 = new Image();
+char1.src = src('char.png');
+window.addEventListener("keydown",function(e){
+    key[e.keyCode]=true;
+});
+window.addEventListener("keyup",function(e){
+    key[e.keyCode]= false;
+});
+
+class Character {
+    constructor() {
+        this.DEBUG = false;
+        this.IGNOREPHY = false;
+        this.M = "yellow";
+        //physics
+        this.InterRate = 0.35;
+        this.SlideRate = 1.38;
+        this.SlideSpeed = 8;
+        this.g = 0.17;
+        this.max_v_y = 10;
+        this.p_y = 150;
+        this.p_x = 200;
+        this.v_y = 0;
+        this.v_x = 0;
+        this.power = 0;
+        this.powerx = 3.3;
+        this.power_v = 0.075;
+        this.max_power_v = 9;
+        this.dirRight = true;
+        this.GROUNDED = false;
+        this.JUMPING = false;
+        this.LOADING = false;
+        this.WALKING = false;
+        //volume
+        this.wid = 60;
+        this.hei = 60;
+    }
+
+    update(map) {
+        map = map.vertexes;
+        this.v_y = this.v_y - this.g;
+        if (this.v_y < -this.max_v_y)
+            this.v_y = -this.max_v_y;
+
+        var p1 = {x:this.p_x-this.wid/2,y:this.p_y-this.hei/2};
+        var p2 = {x:this.p_x-this.wid/2,y:this.p_y+this.hei/2};
+        var p3 = {x:this.p_x+this.wid/2,y:this.p_y+this.hei/2};
+        var p4 = {x:this.p_x+this.wid/2,y:this.p_y-this.hei/2};
+        var p5 = {x:this.p_x-this.wid/2,y:this.p_y-this.hei/6};
+        var p6 = {x:this.p_x-this.wid/2,y:this.p_y+this.hei/6};
+        var p7 = {x:this.p_x-this.wid/6,y:this.p_y+this.hei/2};
+        var p8 = {x:this.p_x+this.wid/6,y:this.p_y+this.hei/2};
+        var p9 = {x:this.p_x+this.wid/2,y:this.p_y+this.hei/6};
+        var p10 = {x:this.p_x+this.wid/2,y:this.p_y-this.hei/6};
+        var p11 = {x:this.p_x+this.wid/6,y:this.p_y-this.hei/2};
+        var p12 = {x:this.p_x-this.wid/6,y:this.p_y-this.hei/2};
+
+        var c1 = false;
+        var c2 = false;
+        var c3 = false;
+        var c4 = false;
+        var c5 = false;
+        var c6 = false;
+        var c7 = false;
+        var c8 = false;
+        var c9 = false;
+        var c10 = false;
+        var c11 = false;
+        var c12 = false;
+        for (var i=0;i<map.length;i++)
+        {
+            if (map[i].col)
+            {
+                if (!c1.c)
+                    c1 = map[i].cal_collision(p1);
+                if (!c2.c)
+                    c2 = map[i].cal_collision(p2);
+                if (!c3.c)
+                    c3 = map[i].cal_collision(p3);
+                if (!c4.c)
+                    c4 = map[i].cal_collision(p4);
+                if (!c5.c)
+                    c5 = map[i].cal_collision(p5);
+                if (!c6.c)
+                    c6 = map[i].cal_collision(p6);
+                if (!c7.c)
+                    c7 = map[i].cal_collision(p7);
+                if (!c8.c)
+                    c8 = map[i].cal_collision(p8);
+                if (!c9.c)
+                    c9 = map[i].cal_collision(p9);
+                if (!c10.c)
+                    c10 = map[i].cal_collision(p10);
+                if (!c11.c)
+                    c11 = map[i].cal_collision(p11);
+                if (!c12.c)
+                    c12 = map[i].cal_collision(p12);
+            }
+        }
+        if (!this.IGNOREPHY){
+            if (((c1.c&&c1.info==2)||(c4.c&&c4.info==2))&&(!c5.c&&!c10.c&&!(c11.c&&c1.info==1)&&!(c12.c&&c12.info==1)))
+            {
+                //this.v_x = 0:
+                this.M="skyblue";
+                this.WALKING = false;
+                this.GROUNDED =false;
+                this.JUMPING = false;
+                if (c1.c)
+                {
+                    this.v_x = this.SlideSpeed*Math.cos(c1.slide);
+                    this.v_y = this.SlideSpeed*Math.sin(c1.slide);
+                }
+                if (c4.c)
+                {
+                    this.v_x = -1 * this.SlideSpeed * Math.cos(c4.slide);
+                    this.v_y = -1 * this.SlideSpeed * Math.sin(c4.slide);
+                }
+            }
+            else if (((c1.c&&c1.info==1) || (c4.c&&c4.info==1) || (c11.c&&c11.info==1) || (c12.c&&c12.info==1)))
+            {
+                this.M="blue";
+                this.WALKING = false;
+                if(!this.GROUNDED)
+                {
+                    this.GROUNDED = true;
+                    this.JUMPING = false;
+                    this.v_x = 0;
+                    this.p_y -= this.v_y * this.InterRate;
+                }
+                if(this.GROUNDED)
+                {
+                    this.v_y = 0;
+                    if (key[32]&&!c2.c&&!c3.c&&!c5.c&&!c6.c&&!c9.c&&!c10.c)
+                    {
+                        this.v_x = 0;
+                        if(this.LOADING)
+                        {
+                            this.power = this.power + this.power_v;
+                            if (this.power > this.max_power_v)
+                            {
+                                this.power = this.max_power_v;
+                            }
+                        }
+                        else
+                        {
+                            this.LOADING = true;
+                        }
+                    }
+                    else if (this.GROUNDED && this.LOADING)
+                    {
+                        if(this.power < 2)
+                        {
+                            this.LOADING = false;
+                            this.power = 0;
+                        }
+                        else
+                        {
+                            this.LOADING = false;
+                            this.v_y = this.power;
+                            this.p_y += this.v_y;
+                            if (this.dirRight || c2.c)
+                            {
+                                this.v_x = this.powerx;
+                            }
+                            else if(!this.dirRight || c3.c)
+                            {
+                                this.v_x = -this.powerx;
+                            }
+                            this.power = 0;
+                            this.JUMPING = true;
+                        }
+                    }
+                    else if (key[37] && !this.LOADING && !(c2.c&&c2.info==0)&&!this.JUMPING&&!(c5.c||c6.c))
+                    {
+                        this.WALKING = true;
+                        this.v_x = -1.5;
+                        this.dirRight = false;
+                    }
+                    else if (key[39] && !this.LOADING && !(c3.c&&c3.info==0)&&!this.JUMPING&&!(c9.c||c10.c))
+                    {
+                        this.WALKING = true;
+                        this.v_x = 1.5;
+                        this.dirRight = true;
+                    }
+                    else
+                    {
+                        this.v_x = 0;
+                    }
+                }
+            }
+            else if((c2.c&&c2.info==1)||(c3.c&&c3.info==1)||(c7.c&&c7.info==1)||(c8.c&&c8.info==1)&&(!c6.c&&!c5.c&&!c1.c&&!c8.c&&!c9.c&&!c10.c&&!c4.c))
+            {
+                this.M="orange";
+                this.WALKING = false;
+                this.v_x *= 0.5;
+                this.p_y -= this.v_y * this.InterRate;
+                if (this.v_y > 0)
+                    this.v_y *= -0.5;
+            }
+            else if((c1.c&&c1.info==0)||(c2.c&&c2.info==0)||(c3.c&&c3.info==0)||(c4.c&&c4.info==0)||(c5.c)||(c6.c)||(c9.c)||(c10.c)&&(!c7.c&&!c8.c&&!c11.c&&!c12.c))
+            {
+                this.M="brown";
+                this.WALKING = false;
+                if(c1.c||c2.c||c5.c||c6.c)
+                {
+                    if (this.v_x < 0)
+                    {
+                        this.v_x *= -0.7;
+                        this.dirRight = true;
+                    }
+                }
+                if(c3.c||c4.c||c9.c||c10.c)
+                {
+                    if (this.v_x > 0)
+                    {
+                        this.v_x *= -0.7;
+                        this.dirRight = false;
+                    
+                    }
+                }
+                this.p_x += this.v_x;
+            }
+            else if ((c2.c&&c2.info==2)||(c3.c&&c3.info==2)||(c7.c&&c7.info==2)||(c8.c&&c8.info==2))
+            {
+                this.M="orange";
+                this.WALKING = false;
+                this.v_x *= 0.5;
+                this.p_y -= this.v_y*this.InterRate;
+                if (this.v_y > 0)
+                    this.v_y *= -0.5;
+            }
+            else
+            {
+                this.M="yellow";
+                if (this.GROUNDED)
+                {
+                    this.GROUNDED = false;
+                }
+            }
+            this.p_y = this.p_y + this.v_y;
+            this.p_x = this.p_x + this.v_x;
+            
+            if (this.p_y > height)
+            {
+                MM.level_up();
+                this.p_y = 0;
+            }
+            if (this.p_y < 0)
+            {
+                MM.level_down();
+                this.p_y = height;
+            }
+        }
+        else
+        {
+            if(key[37]){this.p_x-=0.5;} // left
+            if(key[38]){this.p_y+=0.5;} // up
+            if(key[39]){this.p_x+=0.5;} // right
+            if(key[40]){this.p_y-=0.5;} // down
+        }
+        if (this.DEBUG)
+        {
+            var cli = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10, c11, c12];
+            var pli = [p1, p2, p3, p4, p5, p6, p7, p8, p9, p10, p11, p12];
+            for (var i=0; i<12; i++)
+            {
+                if (cli[i].c&&cli[i].info == 0)
+                {
+                    var p = Coord(pli[i]);
+                    ctx.fillStyle="red";
+                    ctx.fillRect(p.x-7, p.y-7, 15, 15);
+                }
+                else if (cli[i].c&&cli[i].info == 1)
+                {
+                    var p = Coord(pli[i]);
+                    ctx.fillStyle="blue";
+                    ctx.fillRect(p.x-7, p.y-7, 15, 15);
+                }
+                else if (cli[i].c&&cli[i].info == 2)
+                {
+                    var p = Coord(pli[i]);
+                    ctx.fillStyle="green";
+                    ctx.fillRect(p.x-7, p.y-7, 15, 15);
+                }
+                else if (cli[i].c&&cli[i].info == -1)
+                {
+                    var p = Coord(pli[i]);
+                    ctx.fillStyle="orange";
+                    ctx.fillRect(p.x-7, p.y-7, 15, 15);
+                }
+                else
+                {
+
+                }
+            }
+        }
+    }
+
+    draw()
+    {
+        var p = Coord({x:this.p_x, y:this.p_y});
+        if (this.LOADING)
+        {
+            if (this.dirRight)
+                char1.src = src('char4.png');
+            else
+                char1.src = src('char3.png');
+        }
+        else
+        {
+            if (this.dirRight)
+            {
+                if (this.WALKING)
+                    char1.src = anim.get("walk")
+                else
+                    char1.src = src('char.png');
+            }
+            else
+            {
+                if (this.WALKING)
+                    char1.src = anim2.get("walk")
+                else
+                    char1.src = src('char2.png');
+            }
+        }
+        if (this.DEBUG)
+        {
+            ctx.fillStyle = this.M;
+            ctx.fillRect(p.x - this.wid/2, p.y - this.hei/2, this.wid, this.hei);
+        }
+        else
+        {
+            ctx.drawImage(char1, p.x - this.wid/2, p.y - this.hei/2, this.wid, this.hei);
+        }
+    }
+}
+
+class Vertex {
+    constructor() {
+        this.points = new Array();
+        this.material = "black";
+        this.img = new Image();
+        this.img_anchor = null;
+        this.img_hw = null;
+        this.col = true;
+    }
+    square(startx, starty, width, height) {
+        this.add_point(startx, starty);
+        this.add_point(startx, starty+height);
+        this.add_point(startx+width, starty+height);
+        this.add_point(startx+width, starty);
+        this.img_anchor = {x:startx, y:starty+height};
+        this.img_hw = {w:width, h:height};
+        return this;
+    }
+    triangle(x, y, width, height) {
+        if (width > 0)
+        {
+            this.add_point(x, y);
+            this.add_point(x, y+height);
+            this.add_point(x+width, y);
+            this.img_anchor = {x:x, y:y+height};
+            this.img_hw = {w:width, h:height};
+        }
+        else
+        {
+            this.add_point(x+width, y);
+            this.add_point(x, y+height);
+            this.add_point(x+width, y);
+            this.img_anchor = {x:x+width, y:y+height};
+            this.img_hw = {w:-width, h:height};
+        }
+        return this;
+    }
+    add_point(x, y) {
+        this.points.push({x, y});
+        return this;
+    }
+    move(x, y) {
+        for (var i=0; i<this.points.length; i++) {
+            this.points[i].x += x;
+            this.points[i].y += y;
+        }
+        return this;
+    }
+    set_material(s) {
+        this.img.src = src(s);
+        return this;
+    }
+    set_color(c) {
+        this.material = c;
+        return this;
+    }
+    set_anchor_hw(xx, yy, ww, hh) {
+        this.img_anchor = {x: xx, y: yy};
+        this.img_hw = {w: ww, h: hh};
+        return this;
+    }
+    set_noncollide() {
+        this.col = false;
+        return this;
+    }
+    cal_collision(p) {
+        var lines = new Array();
+        var plines = new Array();
+        for (var i=0;i<this.points.length-1;i++) {
+            lines.push({x:this.points[i+1].x-this.points[i].x,y:this.points[i+1].y-this.points[i].y});
+            plines.push({x:p.x-this.points[i].x,y:p.y-this.points[i].y});
+        }
+        lines.push({x: this.points[0].x-this.points[this.points.length-1].x,y:this.points[0].y-this.points[this.points.length-1].y});
+        plines.push({x:p.x-this.points[this.points.length-1].x,y:p.y-this.points[this.points.length-1].y});
+        var COLLIDED = true;
+        var mindist = 50000;
+        var info = -1;
+        var data=0;
+        for (var j=0;j<lines.length;j++)
+        {
+            var npvl = Math.sqrt(plines[j].x*plines[j].x+plines[j].y*plines[j].y)
+            var nlvl = Math.sqrt(lines[j].x*lines[j].x+lines[j].y*lines[j].y)
+            var npv = {x:plines[j].x,y:plines[j].y};
+            var nlv = {x:lines[j].x,y:lines[j].y};
+            var cross = npv.x*nlv.y - npv.y*nlv.x;
+            var dist = cross / nlvl;
+            if (cross < 0)
+                COLLIDED = false;
+            else if(dist<=mindist)
+            {
+                mindist = dist;
+                if(nlv.x==0||nlv.y==0)
+                {
+                    if(nlv.x==0)
+                    {
+                        info=0;
+                    }
+                    if(nlv.y==0)
+                    {
+                        info=1;
+                    }
+                }
+                else
+                {
+                    info=2;
+                    data = Math.atan2(nlv.y, nlv.x);
+                }
+            }
+        }                
+        return {c:COLLIDED,info:info,data:mindist,slide:data}
+    }
+
+    draw() {
+        if (this.img.src==''||this.img.src==null)
+        {
+            ctx.fillStyle = this.material;
+            ctx.beginPath();
+            var p = Coord(this.points[0]);
+            ctx.moveTo(p.x, p.y);
+            for (var i = 1; i < this.points.length; i++) {
+                var p = Coord(this.points[i]);
+                ctx.lineTo(p.x, p.y);
+            }
+            ctx.fill();
+        }
+        else {
+            var p = Coord(this.img_anchor);
+            ctx.drawImage(this.img, p.x, p.y, this.img_hw.w, this.img_hw.h);
+            // console.log("Drawing image at:", p, "with size:", this.img_hw.w, this.img_hw.h);
+        }
+    }
+}
+
+class MAP {
+    constructor() {
+        this.vertexes = new Array();
+        var Vertex1 = new Vertex();
+        var Vertex2 = new Vertex();
+        Vertex1.square(-99,0, 100,height);
+        Vertex2.square(width-1,0,100,height);
+        this.append(Vertex1);
+        this.append(Vertex2);
+        this.src = null;
+        this.bg = new BG(0);
+    }
+    append(vert) {
+        this.vertexes.push(vert);
+    }
+    set_bg(src) {
+        this.bg.src = src;
+    }
+    draw() {
+        if (this.src==null) {
+            this.bg.draw(Char.p_y);
+        }
+        else {
+            ctx.drawImage(this.bg, 0, 0, width, height); //
+        }
+        for (var i=0;i<this.vertexes.length;i++)
+            this.vertexes[i].draw();
+    }
+}
+
+class BG {
+    constructor(idx) {
+        this.idx = idx;
+        this.ty = 0;
+        this.layer = 20;
+    }
+    getColor(i)
+    {
+        var color = {r:0, g:255, b:255};
+        var temp = this.idx+i*10;
+        if(temp < 128)
+        {
+            color.g=255 - temp;
+            color.r=128;
+            color.b=255;
+        }
+        else if (temp < 256)
+        {
+            color.g=128;
+            color.r=temp;
+            color.b=255;
+        }
+        else if (temp < 384)
+        {
+            color.g=128;
+            color.r=255;
+            color.b=512 - temp;
+        }
+        else
+        {
+            color.r=255;
+            color.g=temp-256;
+            color.b=128;
+        }
+        return "rgba("+color.r+","+color.g+","+color.b+")";
+    }
+
+    draw(y)
+    {
+        this.ty += (y - this.ty)*0.02;
+        var power = (height- this.ty) / height * 3 + 1;
+        var del = 1 / this.layer;
+        for (var i = 0; i < this.layer; i++)
+        {
+            var h = height * (1 - i * del) * power;
+            ctx.fillStyle = this.getColor(i);
+            ctx.fillRect(0, height - h, width, h);
+        }
+    }
+}
+
+class MAPMANAGER {
+    constructor() 
+    {
+        this.maps = new Array();
+        this.index = 0;
+    }
+    level_up() {
+        if (this.index < this.maps.length - 1)
+            this.index++;
+        else if (this.index == this.maps.length - 1)
+        {
+            alert("JJamp King CLEAR! " + timer.str());
+        }
+    }
+    level_down() {
+        if (this.index > 0)
+        {
+            this.index--;
+        }
+    }
+    append(map) {
+        this.maps.push(map);
+    }
+
+    get_map() {
+        return this.maps[this.index];
+    }
+    get_percent() {
+        ctx.fillStyle = "black";
+        ctx.font = "20px Arial";
+        var per = (this.index * height + Char.p_y) / ((this.maps.length) * height) * 100;
+        ctx.fillText(name + " progress: " + Math.round(per, 2) + "% " + timer.str(), width / 6, 20);
+    }
+    set_bg_color() {
+        var len = this.maps.length;
+        var step = 512 / len;
+        for (var i = 0; i < len; i++)
+        {
+           this.maps[i].bg = new BG(step * i);
+        }
+    }
+}
+
+function Coord(points){
+    var x = points.x;
+    var y = height - points.y;
+    return {x: x, y: y};
+}
+
+function Game()
+{
+    MM.get_percent();
+    var map = MM.get_map();
+    map.draw();
+    Char.update(map);
+    Char.draw();
+    MM.get_percent();
+}
+
+class ProgressBar {
+    constructor(length)
+    {
+        this.length = length;
+        this.idx = 0;
+        ctx.fillStyle = "white";
+        ctx.fillRect(0, 0, width, height);
+        ctx.fillStyle = "red";
+        ctx.fillRect(width/5-2, height/2-2-15, width*3/5+4, 30+4);
+        ctx.fillStyle = "white";
+        ctx.fillRect(width/5, height/2-15, width*3/5, 30);
+    }
+    next()
+    {
+        this.idx++;
+        ctx.fillStyle = "red";
+        ctx.fillRect(width/5, height/2-15, width*3/5/this.length*this.idx, 30);
+    }
+}
+
+class Anim {
+    constructor (list, t)
+    {
+        this.list = list;
+        this.t = t;
+        this.buff = 0;
+        this.index = 0;
+    }
+    get (state)
+    {
+        if (state=="walk")
+        {
+            this.buff++;
+            if (this.buff>this.t)
+            {
+                this.buff = 0;
+                if (this.index > this.list.length-2)
+                    this.index = 0;
+                else
+                    this.index++;
+            }
+            return this.list[this.index];
+        }
+    }
+}
+
+function src (source)
+{
+    if (true)
+        return "static/images/"+source;
+    else
+        return source;
+        
+}
+
+var Char = new Character();
+var anim = new Anim([src('char5.png'),src('char.png'),src('char6.png'),src('char.png')], 20);
+var anim2 = new Anim([ src('char7.png'),src('char2.png'),src('char8.png'),src('char2.png') ], 20);
+var MM = new MAPMANAGER();
+var PB = new ProgressBar(7);
+
+var MAP1 = new MAP();
+var Vertex1 = new Vertex();
+var Vertex2 = new Vertex();
+var Vertex3 = new Vertex();
+var Vertex4 = new Vertex();
+var Vertex5 = new Vertex();
+var Vertex6 = new Vertex();
+
+Vertex1.square(0, 0, width, 100);
+Vertex1.img.src = src('1_2.png');
+Vertex2.square(200, 400, 80, 80).set_material('ho.png');
+Vertex4.square(400, 350, 80, 80).set_material('gook.png');
+Vertex5.square(600, 250, 80, 80).set_material('yo.png');
+Vertex6.square(800, 150, 80, 80).set_material('ram.png');
+Vertex3.square(0, 100, 150, 450);
+Vertex3.img.src = src('1_1.png');
+MAP1.append(Vertex1);
+MAP1.append(Vertex2);
+MAP1.append(Vertex3);
+MAP1.append(Vertex4);
+MAP1.append(Vertex5);
+MAP1.append(Vertex6);
+MM.append(MAP1);
+
+PB.next();
+// //MAP2
+var MAP2 = new MAP();
+MAP2.append(new Vertex().square(150, 50, 100, 30).set_material('sagyeok.png'));
+MAP2.append(new Vertex().square(400, 0, 150, 150).set_material('2_6.png'));
+MAP2.append(new Vertex().square(800, 100, 100, 30).set_material('2_2.png'));
+MAP2.append(new Vertex().square(800, 250, 100, 30).set_material('2_3.png'));
+MAP2.append(new Vertex().square(800, 400, 100, 30).set_material('2_4.png'));
+MAP2.append(new Vertex().square(800, 550, 100, 30).set_material('2_5.png'));
+MAP2.append(new Vertex().square(620, 375, 50, 20).set_material('2_1.png'));
+MAP2.append(new Vertex().square(510, 520, 50, 20).set_material('2_1.png'));
+MAP2.append(new Vertex().square(340, 420, 50, 20).set_material('2_1.png'));
+MAP2.append(new Vertex().square(200, 450, 50, 20).set_material('2_1.png'));
+MAP2.append(new Vertex().square(50, 550, 50, 100).set_material('2_7.png'));
+MAP2.append(new Vertex().square(50, 400, 50, 100).set_material('2_7.png'));
+MAP2.append(new Vertex().square(50, 250, 50, 100).set_material('2_7.png'));
+MM.append(MAP2);
+
+PB.next();
+
+//MAP3
+var MAP3 = new MAP();
+MAP3.append(new Vertex().square(130, 100, 100, 30).set_material("suryu.png"));
+MAP3.append(new Vertex().square(230, 100, 30, 80).set_color("gray"));
+MAP3.append(new Vertex().square(450, 200, 30, 30).set_material("cbomb.png"));
+v = new Vertex();
+v.add_point(700, 25);
+v.add_point(700, 75);
+v.add_point(750, 125);
+v.add_point(810, 125);
+v.add_point(860, 75);
+v.add_point(860, 25);
+v.img_anchor = {x:630, y: 125};
+v.img_hw = {w: 160, h: 100};
+v.img.src = src("eeee.png");
+v.move(-70, 0);
+MAP3.append(v);
+
+v = new Vertex();
+v.add_point(600, 400);
+v.add_point(600, 550);
+v.add_point(650, 550);
+v.add_point(750, 450);
+v.add_point(750, 400);
+v.img_anchor = {x:650, y:500};
+v.img_hw = {w:150, h:150};
+v.img.src = src("yougeup.png");
+v.move(50, -50);
+MAP3.append(v);
+MAP3.append(new Vertex().square(100, 525, 150, 25).set_color("gray"));
+MAP3.append(new Vertex().square(500, 475, 150, 25).set_color("gray"));
+MAP3.append(new Vertex().square(670, 600, 30, 100).set_color("gray"));
+MAP3.append(new Vertex().square(width-60, 300, 60, 30).set_color("gray"));
+MAP3.append(new Vertex().square(100, 250, 25, 550).set_color("gray"));
+MM.append(MAP3);
+PB.next();
+
+//MAP4true
+var MAP6 = new MAP();
+MAP6.append(new Vertex().square(100, 0, 25, 275).set_color('#42424d'));
+MAP6.append(new Vertex().square(125, 60, 40, 25).set_color('#42424d'));
+MAP6.append(new Vertex().square(300, 2, 150, 75).set_material('6_1.png'));
+MAP6.append(new Vertex().square(625, 5, 75, 150).set_material('6_2.png'));
+MAP6.append(new Vertex().square(800, 5, 75, 40).set_material('6_3.png'));
+MAP6.append(new Vertex().square(width-40, 150, 40, 40).set_material('6_4.png'));
+MAP6.append(new Vertex().square(100, height-15, width-100, 15).set_color('#42424d'));
+MAP6.append(new Vertex().add_point(100,275).add_point(100,300).add_point(750, 550).add_point(800,550).add_point(800,275).move(0,0).set_anchor_hw(100, 550, 700, 275).set_material('6_5.png'));
+MAP6.append(new Vertex().square(800, 300, 40, 40).set_color('#42424d'));
+MAP6.append(new Vertex().square(width-30, 420, 30, 30).set_color('#42424d'));
+MAP6.append(new Vertex().square(100, 550, 30, 20).set_color('#42424d'));
+MAP6.append(new Vertex().square(320, 550, 30, 30).set_color('#42424d'));
+MAP6.append(new Vertex().square(500, 550, 30, 50).set_color('#42424d'));
+MAP6.append(new Vertex().square(650, 550, 150, 15).set_color('#42424d'));
+MAP6.append(new Vertex().square(100, 550, 700, 225).set_material('6_6.png').set_noncollide());
+MAP6.append(new Vertex().square(width-95, height-65, 95, 65).set_material('6_7.png'));
+MM.append(MAP6);
+PB.next();
+
+//MAP5
+var MAP7 = new MAP();
+MAP7.append(new Vertex().add_point(150,0).add_point(150,50).add_point(width,100).add_point(width,0).set_color('#8c5f46'));
+MAP7.append(new Vertex().square(100, 0, 50, 25).set_color('#8c5f46'));
+MAP7.append(new Vertex().square(100, 150, 60, 30).set_color('#8c5f46'));
+MAP7.append(new Vertex().add_point(500, 500).add_point(500, 530).add_point(540, 570).add_point(570, 570).add_point(570, 500).move(-500, -500).move(300, 150).set_anchor_hw(300, 220, 70, 70).set_material('7_1.png'));
+
+MAP7.append(new Vertex().add_point(500, 500).add_point(500, 530).add_point(540, 570).add_point(570, 500).move(-500, -500).move(500, 150).set_anchor_hw(500, 220, 70, 70).set_material('7_1.png'));
+MAP7.append(new Vertex().add_point(500, 500).add_point(500, 530).add_point(540, 570).add_point(570, 500).move(-500, -500).move(700, 150).set_anchor_hw(700, 220, 70, 70).set_material('7_1.png'));
+MAP7.append(new Vertex().add_point(500, 500).add_point(500, 530).add_point(540, 570).add_point(570, 500).move(-500, -500).move(930, 120).set_anchor_hw(930, 190, 70, 70).set_material('7_1.png'));
+
+MAP7.append(new Vertex().square(75, 330, 130, 25).set_color('#8c5f46'));
+
+MAP7.append(new Vertex().square(200, 475, 100, 75).set_material('5_1.png'));
+MAP7.append(new Vertex().square(300, 330, 570, 25).set_color('#8c5f46'));
+MAP7.append(new Vertex().square(700, 455, 200, 25).set_color('#8c5f46').move(0, -10));
+
+MAP7.append(new Vertex().square(450, 330, 30, 100).set_color('#8c5f46'));
+
+MAP7.append(new Vertex().add_point(700, 455).add_point(400, 550).add_point(400, 575).add_point(700, 480).set_color('#8c5f46').move(0, -10));
+MAP7.append(new Vertex().square(150, 550, 250, 25).set_color('#8c5f46').move(0, -10));
+MAP7.append(new Vertex().square(0, 430, 50, 80).set_color('#8c5f46'));
+MAP7.append(new Vertex().square(0, height-25, 550, 25).set_color('#8c5f46'));
+MAP7.append(new Vertex().square(900, height-50, 25, 25).set_material('cbomb.png'));
+
+v = new Vertex();
+v.add_point(700, 25);
+v.add_point(700, 75);
+v.add_point(750, 125);
+v.add_point(810, 125);
+v.add_point(860, 75);
+v.add_point(860, 25);
+v.img_anchor = {x:650, y:655};
+v.img_hw = {w: 160, h: 100};
+v.img.src = src("eeee.png");
+v.move(-50, 530);
+MAP7.append(v);
+MM.append(MAP7);
+PB.next();
+
+//MAP8
+var MAP8 = new MAP();
+MAP8.append(new Vertex().square(0, 0, 550, 25).set_color('green'));
+MAP8.append(new Vertex().square(150, 138, 750, 25).set_color('green'));
+MAP8.append(new Vertex().square(0, 275, 850, 25).set_color('green'));
+MAP8.append(new Vertex().square(0, 0, 70, 300).set_material('hangoon.png'));
+MAP8.append(new Vertex().square(width-850, 400, 750, 25).set_color('green'));
+MAP8.append(new Vertex().square(0, 540, 850, 25).set_color('green'));
+MAP8.append(new Vertex().square(300, height-25, width - 400, 25).set_color('green'));
+MAP8.append(new Vertex().square(0, 540, 200, 165).set_material('8_1.png'));
+MM.append(MAP8);
+PB.next();
+
+//MAPS
+var MAP5 = new MAP();
+MAP5.append(new Vertex().square(300, 0, width - 400, 25).set_color('#4b4b4b'));
+MAP5.append(new Vertex().square(0, 0, 200, 25).set_color('#4b4b4b'));
+MAP5.append(new Vertex().square(0, 200, 600, 50).move(0, 100).set_color('#4b4b4b'));
+MAP5.append(new Vertex().square(0, 250, 150, 100).move(0, 100).set_color('#4b4b4b'));
+MAP5.append(new Vertex().square(0, 350, 25, 200).move(0, 100).set_color('#4b4b4b'));
+MAP5.append(new Vertex().square(0, 650, 200, 50).set_material('55_1.png'));
+MAP5.append(new Vertex().square(375, 530, 80, 50).set_material('55_2.png'));
+MAP5.append(new Vertex().square(630, 530, 250, 100).set_material('55_3.png'));
+MAP5.append(new Vertex().add_point(800, 300).add_point(800, 375).add_point(825, 375).add_point(900, 300).add_point(900, 280).set_color('blue'));
+MAP5.append(new Vertex().square(800, 0, 25, 300).set_color('gray'));
+MAP5.append(new Vertex().square(600, 150, 25, 25));
+MAP5.append(new Vertex().square(80, 450, 70, 130).set_material('55_5.png').set_noncollide());
+MAP5.append(new Vertex().square(250, 350, 300, 80).set_material('55_4.png').set_noncollide());
+MM.append(MAP5);
+PB.next();
+
+MM.set_bg_color();
+var interval = setInterval(function() {
+    Game();
+}, 1000/FrameRate);
+</script>
+</html>
